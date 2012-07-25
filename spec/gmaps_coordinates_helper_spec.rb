@@ -52,4 +52,35 @@ describe "Google Maps coordinates helper" do
     t.y.should == 779672
   end
 
+  it "should give correct px coordinates within tile" do
+    tile = GmapsCoordinatesHelper::Point.new(0, 0)
+    px = GmapsCoordinatesHelper::LatLng.new(*CHICAGO).px_coordinates_within_tile(0, tile)
+    px.x.should == 65
+    px.y.should == 95
+
+    tile = GmapsCoordinatesHelper::Point.new(537977, 779672)
+    px = GmapsCoordinatesHelper::LatLng.new(*CHICAGO).px_coordinates_within_tile(21, tile)
+    px.x.should == 112
+    px.y.should == 189
+  end
+
+  it "should return correct set of proximate tiles from tiles_within_px_distance" do
+    tiles = GmapsCoordinatesHelper::LatLng.new(*CHICAGO).tiles_within_px_distance(2, 8)
+    tiles.length.should == 2
+
+    tiles.each do |tile|
+      pxCoords = GmapsCoordinatesHelper::LatLng.new(*CHICAGO).px_coordinates_within_tile(2, tile)
+      pxCoords.x.should be >= -8
+      pxCoords.x.should be <= 255 + 8
+      pxCoords.y.should be >= -8
+      pxCoords.y.should be <= 255 + 8
+    end
+
+    tiles = GmapsCoordinatesHelper::LatLng.new(0, 0).tiles_within_px_distance(0, 8)
+    tiles.length.should == 1
+
+    tiles = GmapsCoordinatesHelper::LatLng.new(0, 0).tiles_within_px_distance(1, 8)
+    tiles.length.should == 4
+  end
+
 end
